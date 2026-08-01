@@ -85,56 +85,92 @@ document.addEventListener("DOMContentLoaded", () => {
         screenProposal.classList.add("active");
     });
 
-    // --- NO Button Logic (Always "🤍 NO", Stays On Screen) ---
+    // --- NO Button Logic (PC + iOS/Android Friendly) ---
     let isEvading = false;
 
     function evadeButton() {
         if (isEvading) return;
         isEvading = true;
 
-        // Move NO button to body so position:fixed works across full viewport
+        // Move to body so it floats freely over everything
         if (noBtn.parentElement !== document.body) {
             document.body.appendChild(noBtn);
         }
 
-        // 1. Fade out and shrink
+        // Force strict text and reset classes to wipe out the old "funny messages"
+        noBtn.innerText = "🤍 NO";
+        noBtn.className = "btn"; // Strips out any old 'round' or weird classes
+        
         noBtn.classList.add("vanish");
         
-        // 2. Calculate position inside visible screen
         setTimeout(() => {
             noBtn.style.position = "fixed";
             noBtn.style.zIndex = "10000";
             
+            // 1. Get true mobile viewport (fixes iOS notch and bottom address bars)
+            const screenWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+            const screenHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            
             const btnWidth = noBtn.offsetWidth || 100; 
             const btnHeight = noBtn.offsetHeight || 45;
             
-            // Keep at least 30px away from any screen edge
-            const maxX = window.innerWidth - btnWidth - 30;
-            const maxY = window.innerHeight - btnHeight - 30;
+            // 2. Large safe padding to keep it far away from phone edges
+            const safePadding = 60; 
+            const maxX = screenWidth - btnWidth - safePadding;
+            const maxY = screenHeight - btnHeight - safePadding;
             
-            const randomX = Math.max(30, Math.floor(Math.random() * maxX));
-            const randomY = Math.max(30, Math.floor(Math.random() * maxY));
+            // 3. Central card avoidance math
+            const proposalCard = document.querySelector(".proposal-card");
+            const cardRect = proposalCard.getBoundingClientRect();
+            const cardPadding = 25; 
 
+            let randomX, randomY;
+            let overlapping = true;
+            let attempts = 0;
+
+            // Roll coordinates until a safe, visible, non-overlapping spot is found
+            while (overlapping && attempts < 100) {
+                randomX = Math.max(safePadding, Math.floor(Math.random() * maxX));
+                randomY = Math.max(safePadding, Math.floor(Math.random() * maxY));
+
+                const btnLeft = randomX;
+                const btnRight = randomX + btnWidth;
+                const btnTop = randomY;
+                const btnBottom = randomY + btnHeight;
+
+                if (
+                    btnRight > (cardRect.left - cardPadding) &&
+                    btnLeft < (cardRect.right + cardPadding) &&
+                    btnBottom > (cardRect.top - cardPadding) &&
+                    btnTop < (cardRect.bottom + cardPadding)
+                ) {
+                    overlapping = true; // Overlaps center box, try again
+                } else {
+                    overlapping = false; // Safe spot found!
+                }
+                attempts++;
+            }
+
+            // Apply safe coordinates
             noBtn.style.left = `${randomX}px`;
             noBtn.style.top = `${randomY}px`;
+            noBtn.innerText = "🤍 NO"; // Double check text is strictly NO
             
-            // Keep text strictly as "🤍 NO"
-            noBtn.innerText = "🤍 NO";
-            
-            // 3. Reappear on screen
             noBtn.classList.remove("vanish");
             isEvading = false;
         }, 200);
     }
 
-    noBtn.addEventListener("click", (e) => {
+    // Bind to BOTH click and touchstart for instant mobile responsiveness
+    const triggerEvade = (e) => {
         e.preventDefault();
         evadeButton();
-    });
+    };
+    noBtn.addEventListener("click", triggerEvade);
+    noBtn.addEventListener("touchstart", triggerEvade, {passive: false});
 
     // --- YES Button Logic ---
     yesBtn.addEventListener("click", () => {
-        // Hide NO button permanently when YES is clicked
         noBtn.style.display = "none";
 
         screenProposal.classList.remove("active");
