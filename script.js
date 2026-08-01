@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
         screenProposal.classList.add("active");
     });
 
-    // --- NO Button Evasion Logic ---
+    // --- NEW: NO Button Evasion Logic (Disappear & Reappear) ---
     const funnyMessages = [
         "Nice try 😂", 
         "Nope ❤️", 
@@ -101,25 +101,35 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     function evadeButton() {
-        // Change button position to fixed so it can roam the whole screen
-        noBtn.style.position = "fixed";
+        // 1. Make the button vanish (shrink and fade out)
+        noBtn.classList.add("vanish");
         
-        // Calculate safe boundaries so it doesn't go off screen or behind YES button
-        const btnWidth = noBtn.offsetWidth;
-        const btnHeight = noBtn.offsetHeight;
-        
-        const maxX = window.innerWidth - btnWidth - 20;
-        const maxY = window.innerHeight - btnHeight - 20;
-        
-        const randomX = Math.max(20, Math.random() * maxX);
-        const randomY = Math.max(20, Math.random() * maxY);
+        // 2. Wait 200ms (matching the CSS transition) before moving it
+        setTimeout(() => {
+            noBtn.style.position = "fixed";
+            
+            // Calculate safe boundaries
+            const btnWidth = noBtn.offsetWidth || 120; 
+            const btnHeight = noBtn.offsetHeight || 50;
+            
+            const maxX = window.innerWidth - btnWidth - 20;
+            const maxY = window.innerHeight - btnHeight - 20;
+            
+            const randomX = Math.max(20, Math.random() * maxX);
+            const randomY = Math.max(20, Math.random() * maxY);
 
-        noBtn.style.left = `${randomX}px`;
-        noBtn.style.top = `${randomY}px`;
-        
-        // Change text
-        const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
-        noBtn.innerText = randomMsg;
+            // Move the button to the new random coordinates
+            noBtn.style.left = `${randomX}px`;
+            noBtn.style.top = `${randomY}px`;
+            
+            // Change the text to a random funny message
+            const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+            noBtn.innerText = randomMsg;
+            
+            // 3. Make the button reappear (pop back in)
+            noBtn.classList.remove("vanish");
+            
+        }, 200); // 200 milliseconds delay
     }
 
     noBtn.addEventListener("mouseover", evadeButton);
@@ -127,7 +137,8 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault(); // Prevent accidental clicking on touch
         evadeButton();
     });
-    // Just in case they somehow click it
+    
+    // Just in case they somehow click it super fast before it vanishes
     noBtn.addEventListener("click", (e) => {
         e.preventDefault();
         evadeButton();
