@@ -173,11 +173,19 @@ button {
     height: 60px; /* Reserve space */
 }
 
-/* No Button Special Rules */
+/* --- NEW: NO Button Disappear Rules --- */
 #no-btn {
-    transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), top 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.2s;
     position: relative; /* Starts relative, becomes fixed in JS */
     z-index: 999;
+    /* We transition the scale and opacity for the pop-out effect */
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+/* Class to make the button vanish */
+.vanish {
+    opacity: 0 !important;
+    transform: scale(0) !important;
+    pointer-events: none; /* Prevents clicking while invisible */
 }
 
 /* Animations */
@@ -263,5 +271,5 @@ button {
     .glass-card { padding: 30px 20px; width: 90%; }
     .envelope { font-size: 6rem; }
     .buttons-container { flex-direction: column; align-items: center; }
-    #no-btn { margin-top: 10px; } /* Initial mobile margin */
+    #no-btn { margin-top: 10px; }
 }
