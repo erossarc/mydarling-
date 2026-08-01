@@ -89,13 +89,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- NO Button Logic (Disappear & Reappear ON CLICK/TAP) ---
     const funnyMessages = [
-        "Nice try 😂", 
-        "Nope ❤️", 
-        "Think again 😏", 
-        "Are you sure? 🤭", 
-        "Mission Failed 😆", 
-        "You can't reject destiny 💖", 
-        "The universe says YES 🌸"
+        "NO", 
+        "NO", 
+        "NO", 
+        "NO", 
+        "NO", 
+        "NO", 
+        "NO"
     ];
 
     let isEvading = false;
