@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         screenLetter.classList.add("active");
         
         musicToggle.classList.remove("hidden");
-        // Try to autoplay music on first interaction
+        // Autoplay music on first interaction if possible
         if(!isPlaying) {
             bgMusic.play().then(() => {
                 isPlaying = true;
@@ -63,16 +63,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startTyping() {
         if (charIndex < letterText.length) {
-            // Handle line breaks
             if(letterText.charAt(charIndex) === '\n') {
                 typingContainer.innerHTML += "<br>";
             } else {
                 typingContainer.innerHTML += letterText.charAt(charIndex);
             }
             charIndex++;
-            setTimeout(startTyping, 40); // Typing speed
+            setTimeout(startTyping, 40);
         } else {
-            // Finished typing
             setTimeout(() => {
                 letterEnding.classList.remove("hidden");
                 continueBtn.classList.remove("hidden");
@@ -89,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         screenProposal.classList.add("active");
     });
 
-    // --- NEW: NO Button Evasion Logic (Disappear & Reappear) ---
+    // --- NO Button Logic (Disappear & Reappear ON CLICK/TAP) ---
     const funnyMessages = [
         "Nice try 😂", 
         "Nope ❤️", 
@@ -100,45 +98,44 @@ document.addEventListener("DOMContentLoaded", () => {
         "The universe says YES 🌸"
     ];
 
+    let isEvading = false;
+
     function evadeButton() {
-        // 1. Make the button vanish (shrink and fade out)
+        if (isEvading) return; // Prevent spamming while animating
+        isEvading = true;
+
+        // 1. Shrink & fade out the NO button when she clicks/taps it
         noBtn.classList.add("vanish");
         
-        // 2. Wait 200ms (matching the CSS transition) before moving it
+        // 2. Wait 200ms for disappearance animation to complete
         setTimeout(() => {
             noBtn.style.position = "fixed";
             
-            // Calculate safe boundaries
+            // Calculate random screen position within safe margins
             const btnWidth = noBtn.offsetWidth || 120; 
             const btnHeight = noBtn.offsetHeight || 50;
             
-            const maxX = window.innerWidth - btnWidth - 20;
-            const maxY = window.innerHeight - btnHeight - 20;
+            const maxX = window.innerWidth - btnWidth - 30;
+            const maxY = window.innerHeight - btnHeight - 30;
             
-            const randomX = Math.max(20, Math.random() * maxX);
-            const randomY = Math.max(20, Math.random() * maxY);
+            const randomX = Math.max(30, Math.random() * maxX);
+            const randomY = Math.max(30, Math.random() * maxY);
 
-            // Move the button to the new random coordinates
+            // Move button to new location
             noBtn.style.left = `${randomX}px`;
             noBtn.style.top = `${randomY}px`;
             
-            // Change the text to a random funny message
+            // Change message text
             const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
             noBtn.innerText = randomMsg;
             
-            // 3. Make the button reappear (pop back in)
+            // 3. Make the button reappear in the new location
             noBtn.classList.remove("vanish");
-            
-        }, 200); // 200 milliseconds delay
+            isEvading = false;
+        }, 200);
     }
 
-    noBtn.addEventListener("mouseover", evadeButton);
-    noBtn.addEventListener("touchstart", (e) => {
-        e.preventDefault(); // Prevent accidental clicking on touch
-        evadeButton();
-    });
-    
-    // Just in case they somehow click it super fast before it vanishes
+    // Trigger ONLY when she clicks (computer) or taps (phone)
     noBtn.addEventListener("click", (e) => {
         e.preventDefault();
         evadeButton();
@@ -153,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
         screenCelebration.classList.add("active");
 
         createConfetti();
-        setInterval(createConfetti, 2000); // Keep raining confetti
+        setInterval(createConfetti, 2000);
     });
 
     // --- Background Effects (Floating Hearts) ---
@@ -164,11 +161,10 @@ document.addEventListener("DOMContentLoaded", () => {
         heart.innerHTML = ["🌸", "💖", "✨", "🤍"][Math.floor(Math.random() * 4)];
         heart.classList.add("floating-heart");
         heart.style.left = `${Math.random() * 100}vw`;
-        heart.style.animationDuration = `${Math.random() * 3 + 3}s`; // 3s - 6s
+        heart.style.animationDuration = `${Math.random() * 3 + 3}s`;
         
         bgEffectsContainer.appendChild(heart);
         
-        // Cleanup
         setTimeout(() => {
             heart.remove();
         }, 6000);
@@ -185,24 +181,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 confetti.style.left = `${Math.random() * 100}vw`;
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                 
-                // Randomize shape (some circles, some rectangles)
                 if (Math.random() > 0.5) confetti.style.borderRadius = "50%";
                 
                 bgEffectsContainer.appendChild(confetti);
                 
                 setTimeout(() => confetti.remove(), 3000);
-            }, i * 50); // Stagger generation
+            }, i * 50);
         }
     }
 
     // --- Cursor Trail (Tiny Hearts) ---
     const cursorTrailContainer = document.getElementById("cursor-trail");
-    
-    // Throttling the mouse move to prevent DOM overload
     let lastMove = 0;
     document.addEventListener("mousemove", (e) => {
         const now = Date.now();
-        if (now - lastMove < 50) return; // Only create a heart every 50ms
+        if (now - lastMove < 50) return;
         lastMove = now;
 
         const heart = document.createElement("div");
