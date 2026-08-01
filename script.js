@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const bgMusic = document.getElementById("bg-music");
     
     // --- Initial Setup ---
-    // Remove loader after 2 seconds
     setTimeout(() => {
         loader.classList.remove("active");
         loader.classList.add("hidden");
@@ -35,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         isPlaying = !isPlaying;
     });
 
-    // --- Envelope Click (Go to Letter) ---
+    // --- Envelope Click ---
     envelopeBtn.addEventListener("click", () => {
         screenLanding.classList.remove("active");
         screenLanding.classList.add("hidden");
@@ -44,7 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
         screenLetter.classList.add("active");
         
         musicToggle.classList.remove("hidden");
-        // Autoplay music on first interaction if possible
         if(!isPlaying) {
             bgMusic.play().then(() => {
                 isPlaying = true;
@@ -55,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
         startTyping();
     });
 
-    // --- Letter Typing Effect ---
+    // --- Typing Effect ---
     const letterText = "My dearest,\n\nFrom the moment you walked into my life, everything changed. You bring light to my darkest days and a smile to my face just by existing. Every laugh we share, every quiet moment, means the world to me.\n\nI can't imagine my future without you in it.";
     const typingContainer = document.getElementById("typing-text");
     const letterEnding = document.getElementById("letter-ending");
@@ -87,62 +85,58 @@ document.addEventListener("DOMContentLoaded", () => {
         screenProposal.classList.add("active");
     });
 
-    // --- NO Button Logic (Disappear & Reappear ON CLICK/TAP) ---
-    const funnyMessages = [
-        "NO", 
-        "NO", 
-        "NO", 
-        "NO", 
-        "NO", 
-        "NO", 
-        "NO"
-    ];
-
+    // --- NO Button Logic (Always "🤍 NO", Stays On Screen) ---
     let isEvading = false;
 
     function evadeButton() {
-        if (isEvading) return; // Prevent spamming while animating
+        if (isEvading) return;
         isEvading = true;
 
-        // 1. Shrink & fade out the NO button when she clicks/taps it
+        // Move NO button to body so position:fixed works across full viewport
+        if (noBtn.parentElement !== document.body) {
+            document.body.appendChild(noBtn);
+        }
+
+        // 1. Fade out and shrink
         noBtn.classList.add("vanish");
         
-        // 2. Wait 200ms for disappearance animation to complete
+        // 2. Calculate position inside visible screen
         setTimeout(() => {
             noBtn.style.position = "fixed";
+            noBtn.style.zIndex = "10000";
             
-            // Calculate random screen position within safe margins
-            const btnWidth = noBtn.offsetWidth || 120; 
-            const btnHeight = noBtn.offsetHeight || 50;
+            const btnWidth = noBtn.offsetWidth || 100; 
+            const btnHeight = noBtn.offsetHeight || 45;
             
+            // Keep at least 30px away from any screen edge
             const maxX = window.innerWidth - btnWidth - 30;
             const maxY = window.innerHeight - btnHeight - 30;
             
-            const randomX = Math.max(30, Math.random() * maxX);
-            const randomY = Math.max(30, Math.random() * maxY);
+            const randomX = Math.max(30, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(30, Math.floor(Math.random() * maxY));
 
-            // Move button to new location
             noBtn.style.left = `${randomX}px`;
             noBtn.style.top = `${randomY}px`;
             
-            // Change message text
-            const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
-            noBtn.innerText = randomMsg;
+            // Keep text strictly as "🤍 NO"
+            noBtn.innerText = "🤍 NO";
             
-            // 3. Make the button reappear in the new location
+            // 3. Reappear on screen
             noBtn.classList.remove("vanish");
             isEvading = false;
         }, 200);
     }
 
-    // Trigger ONLY when she clicks (computer) or taps (phone)
     noBtn.addEventListener("click", (e) => {
         e.preventDefault();
         evadeButton();
     });
 
-    // --- YES Button Logic (Celebration) ---
+    // --- YES Button Logic ---
     yesBtn.addEventListener("click", () => {
+        // Hide NO button permanently when YES is clicked
+        noBtn.style.display = "none";
+
         screenProposal.classList.remove("active");
         screenProposal.classList.add("hidden");
         
@@ -153,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setInterval(createConfetti, 2000);
     });
 
-    // --- Background Effects (Floating Hearts) ---
+    // --- Background Effects ---
     const bgEffectsContainer = document.getElementById("bg-effects");
     
     function createFloatingHeart() {
@@ -190,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Cursor Trail (Tiny Hearts) ---
+    // --- Cursor Trail ---
     const cursorTrailContainer = document.getElementById("cursor-trail");
     let lastMove = 0;
     document.addEventListener("mousemove", (e) => {
